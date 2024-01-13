@@ -1,5 +1,5 @@
 # The Georgia Tech Plant Health Tracker / Monitor
-This repository contains all software and relevant files for the Plant Health Tracker, a GATech Spring 2024 Senior Design project.
+A GATech Spring 2024 Senior Design (ECE 4871/4872) project.
 
 ### 1. documentation/
    - project documentation. contains design documents, diagrams, wireframes, etc.
