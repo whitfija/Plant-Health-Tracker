@@ -8,11 +8,11 @@ This repository contains all software and relevant files for the Plant Health Tr
    - code running on pht device (controls and communicates with hardware)
 
 ### 3. webapp/
-   - web application directories and files
+   - directories and files for pht web application
 
 ### 4. db/
-   - database directories and files
-   - 
+   - directories and files for use of custom pht database, storing information about plants
+
 # Team members / contributors
 * Supratim Kundu  |  Computer Engineering  |  skundu37@gatech.edu 
 * Garrett Jones  |  Electrical Engineering  |  gjones97@gatech.edu 
