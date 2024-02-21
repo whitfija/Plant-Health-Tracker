@@ -1,12 +1,18 @@
 import logo from './logo.svg';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';
 import Dashboard from './Components/Dashboard';
+import TestDataComponent from './Components/firebaseTesting';
 
 function App() {
   return (
-    <div className="App">
-      <Dashboard></Dashboard>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/datatest" element={<TestDataComponent />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
