@@ -18,7 +18,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 import Chart from './Chart';
-import Deposits from './Deposits';
+import HealthStatus from './Deposits';
 import Orders from './Orders';
 import Overlay from './Overlay'
 
@@ -153,7 +153,7 @@ export default function Dashboard() {
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
               {/* Chart */}
-              <Grid item xs={12} md={8} lg={9}>
+              <Grid item xs={12} md={8} lg={9} style={{minWidth:"100%"}}>
                 <Paper
                   sx={{
                     p: 2,
@@ -175,7 +175,43 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <Deposits />
+                  <HealthStatus dataSet="Light" health="Good" dataTime={Date().toLocaleString()} />
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={4} lg={3}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 240,
+                  }}
+                >
+                  <HealthStatus dataSet="Moisture" health="Good" dataTime={Date().toLocaleString()} />
+                </Paper>
+              </Grid>
+               <Grid item xs={12} md={4} lg={3}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 240,
+                  }}
+                >
+                  <HealthStatus dataSet="Temperature" health="Good" dataTime={Date().toLocaleString()} />
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={4} lg={3}>
+                <Paper
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 240,
+                  }}
+                >
+                  <HealthStatus dataSet="Humidity" health="Good" dataTime={Date().toLocaleString()} />
                 </Paper>
               </Grid>
               {/* Recent Orders */}

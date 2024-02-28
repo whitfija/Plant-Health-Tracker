@@ -184,6 +184,7 @@ const TestDataComponent = () => {
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
+            padding: 10,
           }}
         >
         <h2>Plant Data Test</h2>
