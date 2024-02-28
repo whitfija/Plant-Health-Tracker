@@ -7,19 +7,19 @@ function preventDefault(event) {
   event.preventDefault();
 }
 
-export default function Deposits() {
+export default function HealthStatus({dataSet, health, dataTime}) {
   return (
     <React.Fragment>
-      <Title>Recent Deposits</Title>
+      <Title>{dataSet}</Title>
       <Typography component="p" variant="h4">
-        $3,024.00
+        Status: {health}
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>
-        on 15 March, 2019
+        {dataTime}
       </Typography>
       <div>
         <Link color="primary" href="#" onClick={preventDefault}>
-          View balance
+          View graphs
         </Link>
       </div>
     </React.Fragment>

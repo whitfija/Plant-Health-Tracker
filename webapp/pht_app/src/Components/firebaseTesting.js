@@ -5,9 +5,12 @@ import { getAnalytics } from "firebase/analytics";
 import React, { useState, useEffect } from 'react';
 
 
-import { useTheme } from '@mui/material/styles';
+import { useTheme, ThemeProvider, createTheme } from '@mui/material/styles';
 import { LineChart, axisClasses } from '@mui/x-charts';
+import Box from '@mui/material/Box';
 import Title from './Title';
+import Overlay from "./Overlay";
+import { CssBaseline } from "@mui/material";
 
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -163,9 +166,27 @@ const TestDataComponent = () => {
         return { time: item.time, amount: item[type] };
       });
     };
+
+    const defaultTheme = createTheme();
   
     return (
-      <div className="plant-data-test">
+    <ThemeProvider theme={defaultTheme}>
+      <Box sx={{ display: 'flex' }}>
+        <CssBaseline />
+        <Overlay />
+        <Box
+          component="main"
+          sx={{
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? theme.palette.grey[100]
+                : theme.palette.grey[900],
+            flexGrow: 1,
+            height: '100vh',
+            overflow: 'auto',
+            padding: 10,
+          }}
+        >
         <h2>Plant Data Test</h2>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
@@ -360,7 +381,9 @@ const TestDataComponent = () => {
             </div>
 
         </div>
-      </div>
+        </Box>
+      </Box>
+    </ThemeProvider>
     );
   };
   
