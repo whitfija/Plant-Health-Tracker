@@ -40,6 +40,7 @@ export default function Chart() {
             {
               scaleType: 'point',
               dataKey: 'time',
+              label: 'Overall plant health',
               tickNumber: 2,
               tickLabelStyle: theme.typography.body2,
             },

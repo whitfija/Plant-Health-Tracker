@@ -19,7 +19,7 @@ export default function HealthStatus({dataSet, health, dataTime}) {
       </Typography>
       <div>
         <Link color="primary" href="#" onClick={preventDefault}>
-          View graphs
+          View status
         </Link>
       </div>
     </React.Fragment>
