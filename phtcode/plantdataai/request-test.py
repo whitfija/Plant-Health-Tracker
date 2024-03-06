@@ -1,12 +1,18 @@
-from openai import OpenAI
-client = OpenAI()
+import pathlib
+import textwrap
 
-completion = client.chat.completions.create(
-  model="gpt-3.5-turbo",
-  messages=[
-    {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
-    {"role": "user", "content": "Compose a poem that explains the concept of recursion in programming."}
-  ]
-)
+import google.generativeai as genai
 
-print(completion.choices[0].message)
+from IPython.display import display
+from IPython.display import Markdown
+
+def to_markdown(text):
+  text = text.replace('•', '  *')
+  return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
+
+# Used to securely store your API key
+from google.colab import userdata
+
+GOOGLE_API_KEY=userdata.get('GOOGLE_API_KEY')
+
+genai.configure(api_key=GOOGLE_API_KEY)
