@@ -18,7 +18,7 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 import Chart from './Chart';
-import HealthStatus from './Deposits';
+import HealthStatus from './HealthStatus';
 import Orders from './Orders';
 import Overlay from './Overlay';
 import { firebaseConfig } from './firebaseInitCode';
@@ -118,10 +118,10 @@ export default function Dashboard() {
       querySnapshot.forEach((doc) => {
         baseline = doc.data();
       });
-      (mostRecentDataPt['lightLevel'] < baseline.Light[1] && mostRecentDataPt['lightLevel'] > baseline.Light[0])?setLightHealthy(true):setLightHealthy(false);
-      (mostRecentDataPt['humidity'] < baseline.Humidity[1] && mostRecentDataPt['humidity'] > baseline.Humidity[0])?setHumidityHealthy(true):setHumidityHealthy(false);
-      (mostRecentDataPt['moisture'] < baseline.Moisture[1] && mostRecentDataPt['moisture'] > baseline.Moisture[0])?setMoistureHealthy(true):setMoistureHealthy(false);
-      (mostRecentDataPt['temperature'] < baseline.Temperature[1] && mostRecentDataPt['temperature'] > baseline.Temperature[0])?setTemperatureHealthy(true):setTemperatureHealthy(false);
+      (mostRecentDataPt['lightLevel'] <= baseline.Light[1] && mostRecentDataPt['lightLevel'] >= baseline.Light[0])?setLightHealthy(true):setLightHealthy(false);
+      (mostRecentDataPt['humidity'] <= baseline.Humidity[1] && mostRecentDataPt['humidity'] >= baseline.Humidity[0])?setHumidityHealthy(true):setHumidityHealthy(false);
+      (mostRecentDataPt['moisture'] <= baseline.Moisture[1] && mostRecentDataPt['moisture'] >= baseline.Moisture[0])?setMoistureHealthy(true):setMoistureHealthy(false);
+      (mostRecentDataPt['temperature'] <= baseline.Temperature[1] && mostRecentDataPt['temperature'] >= baseline.Temperature[0])?setTemperatureHealthy(true):setTemperatureHealthy(false);
       setTimeout(() => {
         setIsLoading(false);
       }, 1000);

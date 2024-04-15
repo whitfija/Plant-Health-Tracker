@@ -2,12 +2,21 @@ import * as React from 'react';
 import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import Title from './Title';
+import StatusModal from './StatusModal'
 
 function preventDefault(event) {
   event.preventDefault();
 }
 
 export default function HealthStatus({dataSet, health, dataTime}) {
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const handleClose = () => {
+      setModalOpen(false);
+  };
+
+  const handleOpen = () => {
+      setModalOpen(true);
+  };
   return (
     <React.Fragment>
       <Title>{dataSet}</Title>
@@ -18,9 +27,10 @@ export default function HealthStatus({dataSet, health, dataTime}) {
         {dataTime}
       </Typography>
       <div>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          View status
-        </Link>
+        <button type="button" onClick={handleOpen}>
+          View Status
+        </button>
+        <StatusModal isOpen={modalOpen} onClose={handleClose} />
       </div>
     </React.Fragment>
   );
