@@ -1,6 +1,7 @@
 import pathlib
 import textwrap
-
+import os
+from dotenv import load_dotenv
 import google.generativeai as genai
 
 from IPython.display import display
@@ -10,9 +11,22 @@ def to_markdown(text):
   text = text.replace('•', '  *')
   return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
 
-# Used to securely store your API key
-from google.colab import userdata
-
-GOOGLE_API_KEY=userdata.get('GOOGLE_API_KEY')
-
+load_dotenv()
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 genai.configure(api_key=GOOGLE_API_KEY)
+
+#for m in genai.list_models():
+  #if 'generateContent' in m.supported_generation_methods:
+    #print(m.name)
+
+model = genai.GenerativeModel('gemini-pro')
+
+response = model.generate_content("What is the ideal temperature range for the african violet houseplant? Answer in a full sentence please") 
+
+to_markdown(response.text)
+
+for chunk in response:
+  print(chunk.text)
+  print("_"*80)
+
+print(to_markdown(response.text))
