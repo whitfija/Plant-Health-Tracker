@@ -21,20 +21,23 @@ import Chart from './Chart';
 import HealthStatus from './Deposits';
 import Orders from './Orders';
 import Overlay from './Overlay';
-import { firebaseConfig } from './firebaseInitCode';
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+
+//import { firebaseConfig } from './firebaseInitCode';
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase-admin/firestore";
+import { initializeApp } from "firebase-admin/app";
+import { getAnalytics } from "firebase-admin/analytics";
+
 import { useState, useEffect } from 'react';
 import Loading from './Loading';
 
 
-
 const drawerWidth = 240;
 
-const app = initializeApp(firebaseConfig);
+//initializeApp();
+const app = initializeApp();
+const db = getFirestore();
+console.log(db)
 const analytics = getAnalytics(app);
-const db = getFirestore(app);
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -94,7 +97,7 @@ export default function Dashboard() {
   const [temperatureHealthy, setTemperatureHealthy] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
-      const q = query(collection(db, 'plantData'), orderBy('time', 'desc'));
+      const q = query(collection(db, 'plantData'), orderBy('time'));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newData = [];
         querySnapshot.forEach((doc) => {
