@@ -97,6 +97,7 @@ export default function Dashboard() {
   
   //Read everytime db is updated
   useEffect(() => {
+    console.log('hello')
     const fetchData = async () => {
       const q = query(collection(db, 'plantData'), orderBy('time', 'desc'));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -135,8 +136,20 @@ export default function Dashboard() {
       fetch(`/scrapePlantData/${ip}`).then(res => res.json()).then(data => {
         //If we sucessfully webscrape with the inputted ip
         if(data.Data.length) {
-          //Logic to upload to the database
-          console.log(data.Data)
+          let plantData = data.Data
+          let newData = {}
+          for(let individualData of plantData) {
+            let split = individualData.split(": ")
+            //If valid data, i.e Moisture: 123
+            if(split.length == 2) {
+              newData[split[0]] = parseInt(split[1])
+            }
+          }
+          newData['time'] = new Date().toLocaleString()
+          console.log(newData);
+          //Adds the most recent data point to the database
+          addDoc(collection(db, 'plantData'), newData);
+          //console.log(data.Data)
         }
       })
     } catch(err) {console.log(err.message)};
@@ -148,7 +161,7 @@ export default function Dashboard() {
 
     const interval=setInterval(()=>{
       getPlantData()
-    }, 60000)
+    }, 300000) //Every 5 minutes right now
 
     return()=>clearInterval(interval)
     }, [ip])

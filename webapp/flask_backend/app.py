@@ -36,7 +36,10 @@ def scrapeData():
 @app.route("/scrapePlantData/<string:ip>")
 def scrapePlantData(ip):
     latest_data = scrape_plant(ip)
-    return {'Data': latest_data}
+    #Test return
+    return {'Data': ['moisture: 80','lightLevel: 80', 'temperature: 80', 'humidity: 80']}
+    #Actual return
+    #return {'Data': latest_data}
 
 if __name__ == "__main__":
     app.run(debug=True)
