@@ -63,6 +63,7 @@ const defaultTheme = createTheme();
 
 export default function Overlay() {
   const [open, setOpen] = React.useState(false);
+
   const toggleDrawer = () => {
     setOpen(!open);
   };

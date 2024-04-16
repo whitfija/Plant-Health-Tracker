@@ -22,11 +22,12 @@ import HealthStatus from './HealthStatus';
 import Orders from './Orders';
 import Overlay from './Overlay';
 import { firebaseConfig } from './firebaseInitCode';
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
+import { getFirestore, collection, setDoc, addDoc, doc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { useState, useEffect } from 'react';
 import Loading from './Loading';
+import TextField from '@mui/material/TextField';
 
 
 
@@ -92,6 +93,9 @@ export default function Dashboard() {
   const [moistureHealthy, setMoistureHealthy] = useState(false);
   const [humidityHealthy, setHumidityHealthy] = useState(false);
   const [temperatureHealthy, setTemperatureHealthy] = useState(false);
+  const [ip, setIp] = React.useState("");
+  
+  //Read everytime db is updated
   useEffect(() => {
     const fetchData = async () => {
       const q = query(collection(db, 'plantData'), orderBy('time', 'desc'));
@@ -109,6 +113,47 @@ export default function Dashboard() {
     fetchData();
   }, [db]);
 
+
+  //Get our most recent IP
+  useEffect(() => {
+    if(ip == "") {
+      const fetchIP = async () => {
+        const q = query(collection(db, 'ipAddress'), where('__name__', '==', 'IP'))
+        const querySnapshot = await getDocs(q);
+        let ipData;
+        querySnapshot.forEach((doc) => {
+          ipData = doc.data();
+        });
+        setIp(ipData.currIP)
+      }
+      fetchIP();
+    }
+  }, [])
+
+  const getPlantData = async() => {
+    try {
+      fetch(`/scrapePlantData/${ip}`).then(res => res.json()).then(data => {
+        //If we sucessfully webscrape with the inputted ip
+        if(data.Data.length) {
+          //Logic to upload to the database
+          console.log(data.Data)
+        }
+      })
+    } catch(err) {console.log(err.message)};
+  }
+
+  //Scrape data from given IP and upload to database
+  useEffect(() => {
+    getPlantData()
+
+    const interval=setInterval(()=>{
+      getPlantData()
+    }, 60000)
+
+    return()=>clearInterval(interval)
+    }, [ip])
+
+  //Finds most recent data point and sets the health modals
   useEffect(() => {
     const fetchPlantMetaData = async () => {
       // Will rewrite this query to be flexible for whatever plant the user is using
@@ -153,7 +198,17 @@ export default function Dashboard() {
           <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
-              {/* Chart */}
+              <Grid item xs={12} md={8} lg={9} style={{minWidth:"50%"}}>
+              </Grid>
+              <TextField  onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setIp(e.target.value);
+                  setDoc(doc(db, 'ipAddress', 'IP'), {"currIP": e.target.value});
+                }
+                }}
+                placeholder='Input IP for Wifi' 
+                style={{backgroundColor: "#fff"}}
+              />
               <Grid item xs={12} md={8} lg={9} style={{minWidth:"100%"}}>
                 <Paper
                   sx={{
