@@ -9,11 +9,12 @@ A GATech Spring 2024 Senior Design (ECE 4871/4872) project.
 ### 2. phtcode/
 
 - code running on pht device (controls and communicates with hardware)
-- to run: npm start
 
 ### 3. webapp/
 
 - directories and files for pht web application
+- to run cd ./pht_app && npm run start
+- in another terminal cd ../flask_backend && python app.py
 
 ### 4. db/
 
