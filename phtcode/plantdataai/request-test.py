@@ -12,6 +12,7 @@ def to_markdown(text):
   return Markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
 
 load_dotenv()
+
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
 genai.configure(api_key=GOOGLE_API_KEY)
 
@@ -21,7 +22,7 @@ genai.configure(api_key=GOOGLE_API_KEY)
 
 model = genai.GenerativeModel('gemini-pro')
 
-response = model.generate_content("What is the ideal temperature range for the african violet houseplant? Answer in a full sentence please") 
+response = model.generate_content("What is the ideal temperature range for the Begonia haageana houseplant? Answer in a full sentence please") 
 
 to_markdown(response.text)
 
