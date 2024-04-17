@@ -20,10 +20,21 @@ import { mainListItems, secondaryListItems } from './listItems';
 import Chart from './Chart';
 import HealthStatus from './Deposits';
 import Orders from './Orders';
-import Overlay from './Overlay'
+import Overlay from './Overlay';
+import { firebaseConfig } from './firebaseInitCode';
+import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { useState, useEffect } from 'react';
+import Loading from './Loading';
+
 
 
 const drawerWidth = 240;
+
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const db = getFirestore(app);
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -74,68 +85,58 @@ const defaultTheme = createTheme();
 
 export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState([]);
+  const [mostRecentDataPt, setMostRecentDataPt] = useState({});
+  const [lightHealthy, setLightHealthy] = useState(false);
+  const [moistureHealthy, setMoistureHealthy] = useState(false);
+  const [humidityHealthy, setHumidityHealthy] = useState(false);
+  const [temperatureHealthy, setTemperatureHealthy] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      const q = query(collection(db, 'plantData'), orderBy('time', 'desc'));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const newData = [];
+        querySnapshot.forEach((doc) => {
+          newData.push(doc.data());
+        });
+        setData(newData);
+        setMostRecentDataPt(newData[0])
+      });
+      return unsubscribe;
+    };
+
+    fetchData();
+  }, [db]);
+
+  useEffect(() => {
+    const fetchPlantMetaData = async () => {
+      // Will rewrite this query to be flexible for whatever plant the user is using
+      const q = query(collection(db, 'plantType'), where('__name__', '==', 'African Violet'))
+      const querySnapshot = await getDocs(q);
+      let baseline;
+      querySnapshot.forEach((doc) => {
+        baseline = doc.data();
+      });
+      (mostRecentDataPt['lightLevel'] < baseline.Light[1] && mostRecentDataPt['lightLevel'] > baseline.Light[0])?setLightHealthy(true):setLightHealthy(false);
+      (mostRecentDataPt['humidity'] < baseline.Humidity[1] && mostRecentDataPt['humidity'] > baseline.Humidity[0])?setHumidityHealthy(true):setHumidityHealthy(false);
+      (mostRecentDataPt['moisture'] < baseline.Moisture[1] && mostRecentDataPt['moisture'] > baseline.Moisture[0])?setMoistureHealthy(true):setMoistureHealthy(false);
+      (mostRecentDataPt['temperature'] < baseline.Temperature[1] && mostRecentDataPt['temperature'] > baseline.Temperature[0])?setTemperatureHealthy(true):setTemperatureHealthy(false);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+    };
+    fetchPlantMetaData();
+  }, [mostRecentDataPt]);
+
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
-  return (
+  return isLoading? <Loading/> : (
     <ThemeProvider theme={defaultTheme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
-        {/* <AppBar position="absolute" open={open}>
-          <Toolbar
-            sx={{
-              pr: '24px', // keep right padding when drawer closed
-            }}
-          >
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              sx={{
-                marginRight: '36px',
-                ...(open && { display: 'none' }),
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography
-              component="h1"
-              variant="h6"
-              color="inherit"
-              noWrap
-              sx={{ flexGrow: 1 }}
-            >
-              Dashboard
-            </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Drawer variant="permanent" open={open}>
-          <Toolbar
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
-            }}
-          >
-            <IconButton onClick={toggleDrawer}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </Toolbar>
-          <Divider />
-          <List component="nav">
-            {mainListItems}
-            <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
-          </List>
-        </Drawer> */}
         <Overlay />
         <Box
           component="main"
@@ -175,7 +176,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Light" health="Good" dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Light" health={lightHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
                 </Paper>
               </Grid>
               <Grid item xs={12} md={4} lg={3}>
@@ -187,7 +188,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Moisture" health="Good" dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Moisture" health={moistureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
                 </Paper>
               </Grid>
                <Grid item xs={12} md={4} lg={3}>
@@ -199,7 +200,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Temperature" health="Good" dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Temperature" health={temperatureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
                 </Paper>
               </Grid>
               <Grid item xs={12} md={4} lg={3}>
@@ -211,7 +212,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Humidity" health="Good" dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Humidity" health={humidityHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
                 </Paper>
               </Grid>
               {/* Recent Orders */}
