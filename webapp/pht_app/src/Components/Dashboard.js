@@ -1,87 +1,32 @@
-import * as React from 'react';
+import React, { useRef } from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import MuiDrawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
-import MuiAppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import List from '@mui/material/List';
-import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
-import IconButton from '@mui/material/IconButton';
-import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import MenuIcon from '@mui/icons-material/Menu';
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import { mainListItems, secondaryListItems } from './listItems';
 import Chart from './Chart';
 import HealthStatus from './Deposits';
-import Orders from './Orders';
+import RecentData from './RecentData';
 import Overlay from './Overlay';
-import { firebaseConfig } from './firebaseInitCode';
+import { db } from './firebaseInitCode';
 import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import { useState, useEffect } from 'react';
 import Loading from './Loading';
+import Welcome from './Welcome';
+import PlantHome from './PlantHome';
 
-
-
-const drawerWidth = 240;
-
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const db = getFirestore(app);
-
-const AppBar = styled(MuiAppBar, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  zIndex: theme.zIndex.drawer + 1,
-  transition: theme.transitions.create(['width', 'margin'], {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
-  }),
-  ...(open && {
-    marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  }),
-}));
-
-const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' })(
-  ({ theme, open }) => ({
-    '& .MuiDrawer-paper': {
-      position: 'relative',
-      whiteSpace: 'nowrap',
-      width: drawerWidth,
-      transition: theme.transitions.create('width', {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.enteringScreen,
-      }),
-      boxSizing: 'border-box',
-      ...(!open && {
-        overflowX: 'hidden',
-        transition: theme.transitions.create('width', {
-          easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.leavingScreen,
-        }),
-        width: theme.spacing(7),
-        [theme.breakpoints.up('sm')]: {
-          width: theme.spacing(9),
-        },
-      }),
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#257a33',
     },
-  }),
-);
-
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+    secondary: {
+      main: '#8bab35',
+    },
+  },
+});
 
 export default function Dashboard() {
   const [open, setOpen] = React.useState(true);
@@ -118,10 +63,10 @@ export default function Dashboard() {
       querySnapshot.forEach((doc) => {
         baseline = doc.data();
       });
-      (mostRecentDataPt['lightLevel'] < baseline.Light[1] && mostRecentDataPt['lightLevel'] > baseline.Light[0])?setLightHealthy(true):setLightHealthy(false);
-      (mostRecentDataPt['humidity'] < baseline.Humidity[1] && mostRecentDataPt['humidity'] > baseline.Humidity[0])?setHumidityHealthy(true):setHumidityHealthy(false);
-      (mostRecentDataPt['moisture'] < baseline.Moisture[1] && mostRecentDataPt['moisture'] > baseline.Moisture[0])?setMoistureHealthy(true):setMoistureHealthy(false);
-      (mostRecentDataPt['temperature'] < baseline.Temperature[1] && mostRecentDataPt['temperature'] > baseline.Temperature[0])?setTemperatureHealthy(true):setTemperatureHealthy(false);
+      (mostRecentDataPt['lightLevel'] <= baseline.Light[1] && mostRecentDataPt['lightLevel'] >= baseline.Light[0])?setLightHealthy(true):setLightHealthy(false);
+      (mostRecentDataPt['humidity'] <= baseline.Humidity[1] && mostRecentDataPt['humidity'] >= baseline.Humidity[0])?setHumidityHealthy(true):setHumidityHealthy(false);
+      (mostRecentDataPt['moisture'] <= baseline.Moisture[1] && mostRecentDataPt['moisture'] >= baseline.Moisture[0])?setMoistureHealthy(true):setMoistureHealthy(false);
+      (mostRecentDataPt['temperature'] <= baseline.Temperature[1] && mostRecentDataPt['temperature'] >= baseline.Temperature[0])?setTemperatureHealthy(true):setTemperatureHealthy(false);
       setTimeout(() => {
         setIsLoading(false);
       }, 1000);
@@ -129,12 +74,18 @@ export default function Dashboard() {
     fetchPlantMetaData();
   }, [mostRecentDataPt]);
 
-  const toggleDrawer = () => {
-    setOpen(!open);
+
+  // for selecting charts
+  const [selectedChart, setSelectedChart] = useState('temperature'); // Initialize with default chart
+  const handleChartSelection = (dataType) => {
+    setSelectedChart(dataType);
   };
+  const chartPaper = useRef(null);
+
+
 
   return isLoading? <Loading/> : (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <Overlay />
@@ -152,21 +103,22 @@ export default function Dashboard() {
         >
           <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Grid container spacing={3}>
-              {/* Chart */}
-              <Grid item xs={12} md={8} lg={9} style={{minWidth:"100%"}}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    height: 240,
-                  }}
-                >
-                  <Chart />
+            <Grid container spacing={3} justifyContent="center" alignItems="center">
+
+              {/* Welcome */}
+              <Grid item xs={12} md={6}>
+                <Paper sx={{ p: 2, height: 261.49 }}>
+                  <Welcome userId="0"/>
                 </Paper>
               </Grid>
-              {/* Recent Deposits */}
+              {/* Plant Home */}
+              <Grid item xs={12} md={6}>
+                <Paper sx={{ p: 2}}>
+                  <PlantHome plantId="0JpvIKo0TQ8r70AeSKhe" />
+                </Paper>
+              </Grid>
+
+              {/* health statuses */}
               <Grid item xs={12} md={4} lg={3}>
                 <Paper
                   sx={{
@@ -176,7 +128,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Light" health={lightHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Light" health={lightHealthy ? "Good" : "Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('lightLevel')} chartRef={chartPaper}/>
                 </Paper>
               </Grid>
               <Grid item xs={12} md={4} lg={3}>
@@ -188,7 +140,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Moisture" health={moistureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Moisture" health={moistureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('moisture')} chartRef={chartPaper}/>
                 </Paper>
               </Grid>
                <Grid item xs={12} md={4} lg={3}>
@@ -200,7 +152,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Temperature" health={temperatureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Temperature" health={temperatureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('temperature')} chartRef={chartPaper}/>
                 </Paper>
               </Grid>
               <Grid item xs={12} md={4} lg={3}>
@@ -212,13 +164,30 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Humidity" health={humidityHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} />
+                  <HealthStatus dataSet="Humidity" health={humidityHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('humidity')} chartRef={chartPaper}/>
                 </Paper>
               </Grid>
-              {/* Recent Orders */}
+
+              {/* Chart */}
+              <Grid item xs={12} md={8} lg={9} style={{minWidth:"100%"}}>
+                <Paper 
+                  ref={chartPaper}
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    height: 400,
+                  }}
+                >
+                  <Chart dataType={selectedChart} />
+                </Paper>
+              </Grid>
+
+
+              {/* Recent Data */}
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Orders />
+                  <RecentData />
                 </Paper>
               </Grid>
             </Grid>

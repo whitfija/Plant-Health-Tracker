@@ -6,13 +6,16 @@ import ListSubheader from '@mui/material/ListSubheader';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DataUsageIcon from '@mui/icons-material/DataUsage';
 import AssignmentIcon from '@mui/icons-material/Assignment';
+import SettingsIcon from '@mui/icons-material/Settings';
+import ForestIcon from '@mui/icons-material/Forest';
+
 import { Link } from "react-router-dom";
 
 export const mainListItems = (
   <React.Fragment>
     <ListItemButton component={Link} to="/">
       <ListItemIcon>
-        <DashboardIcon />
+        <ForestIcon />
       </ListItemIcon>
       <ListItemText primary="Dashboard" />
     </ListItemButton>
@@ -23,31 +26,26 @@ export const mainListItems = (
       <ListItemText primary="Data Sets">
       </ListItemText>
     </ListItemButton>
+    <ListItemButton component={Link} to="/">
+      <ListItemIcon>
+        <SettingsIcon />
+      </ListItemIcon>
+      <ListItemText primary="Settings">
+      </ListItemText>
+    </ListItemButton>
   </React.Fragment>
 );
 
 export const secondaryListItems = (
   <React.Fragment>
     <ListSubheader component="div" inset>
-      Saved reports
+      Plants
     </ListSubheader>
     <ListItemButton>
       <ListItemIcon>
-        <AssignmentIcon />
+        <img src="/img/plant.png" alt="Custom Icon" style={{ width: 24, height: 24, marginRight: 8 }} />
       </ListItemIcon>
-      <ListItemText primary="Current month" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Last quarter" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Year-end sale" />
+      <ListItemText primary="African Violet" />
     </ListItemButton>
   </React.Fragment>
 );

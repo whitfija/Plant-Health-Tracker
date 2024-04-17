@@ -15,6 +15,17 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 const drawerWidth = 240;
 
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#487848',
+    },
+    secondary: {
+      main: '#ff4081',
+    },
+  },
+});
+
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
 })(({ theme, open }) => ({
@@ -59,8 +70,6 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
   }),
 );
 
-const defaultTheme = createTheme();
-
 export default function Overlay() {
   const [open, setOpen] = React.useState(false);
   const toggleDrawer = () => {
@@ -68,7 +77,7 @@ export default function Overlay() {
   };
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={theme}>
        <CssBaseline />
        <AppBar position="absolute" open={open}>
           <Toolbar
@@ -95,7 +104,7 @@ export default function Overlay() {
               noWrap
               sx={{ flexGrow: 1 }}
             >
-              Dashboard
+              Plant Health Tracker
             </Typography>
             <IconButton color="inherit">
               <Badge badgeContent={4} color="secondary">
