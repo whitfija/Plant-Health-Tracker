@@ -25,7 +25,15 @@
 }
 
 .App-link {
-  color: #61dafb;
+  color: #61fb6b;
+}
+
+.css-xgqgls {
+  background-color: #487848;
+}
+
+.css-comym9 {
+  background-color: rgb(36 86 45);
 }
 
 @keyframes App-logo-spin {

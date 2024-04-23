@@ -3,58 +3,9 @@ import '../loading.css'
  
 export default function Loading() {
     return (
-        <div class="rootTest">
-        <div class="hexagon" aria-label="Animated hexagonal ripples">
-            <div class="hexagon__group">
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-            </div>
-            <div class="hexagon__group">
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-            </div>
-            <div class="hexagon__group">
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-            </div>
-            <div class="hexagon__group">
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-            </div>
-            <div class="hexagon__group">
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-            </div>
-            <div class="hexagon__group">
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-                <div class="hexagon__sector"></div>
-            </div>
+        <div className="rootTest">
+            <img src={`${process.env.PUBLIC_URL}/img/roundplant.png`} alt="Loading" className="spinner" style={{width: '100px', height: 'auto', marginBottom: '40px'}}/>
             <p aria-label="Loading">Loading</p>
-        </div>
         </div>
     );
 }

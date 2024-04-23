@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, getDocs, query, orderBy, onSnapshot} from "firebase/firestore";
 import { getAnalytics } from "firebase/analytics";
 import React, { useState, useEffect } from 'react';
-
+import { db } from './firebaseInitCode';
 
 import { useTheme, ThemeProvider, createTheme } from '@mui/material/styles';
 import { LineChart, axisClasses } from '@mui/x-charts';
@@ -11,32 +11,6 @@ import Box from '@mui/material/Box';
 import Title from './Title';
 import Overlay from "./Overlay";
 import { CssBaseline } from "@mui/material";
-
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCIZX_86XACr_pFqFDM4BcmAGM7F-zAncI",
-  authDomain: "plant-health-tracker.firebaseapp.com",
-  projectId: "plant-health-tracker",
-  storageBucket: "plant-health-tracker.appspot.com",
-  messagingSenderId: "791972996799",
-  appId: "1:791972996799:web:c1b9b1673aeedfed12480a",
-  measurementId: "G-E6KS4L9KLN"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-// Initialize Cloud Firestore and get a reference to the service
-const db = getFirestore(app);
-
-
-
 
 // test code below
 

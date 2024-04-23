@@ -7,19 +7,34 @@ function preventDefault(event) {
   event.preventDefault();
 }
 
-export default function HealthStatus({dataSet, health, dataTime}) {
+export default function HealthStatus({dataSet, health, dataTime, onSelectChart, chartRef, data}) {
+  const handleViewHistory = (event) => {
+    event.preventDefault();
+    onSelectChart(dataSet.toLowerCase());
+    //if (chartRef.current) {
+      //chartRef.current.scrollIntoView({ behavior: 'smooth' });
+    //}
+  };
+
+  // text color
+  const textStyle = { color: health === 'Good' ? 'green' : 'red', };
+
+
   return (
     <React.Fragment>
       <Title>{dataSet}</Title>
       <Typography component="p" variant="h4">
-        Status: {health}
+        {data}
+      </Typography>
+      <Typography component="p" variant="h4" style={textStyle}>
+        ({health})
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>
         {dataTime}
       </Typography>
       <div>
-        <Link color="primary" href="#" onClick={preventDefault}>
-          View status
+        <Link color="primary" href="#" onClick={handleViewHistory}>
+          View history
         </Link>
       </div>
     </React.Fragment>
