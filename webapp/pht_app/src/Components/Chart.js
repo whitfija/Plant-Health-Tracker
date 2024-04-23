@@ -1,60 +1,73 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { LineChart, axisClasses } from '@mui/x-charts';
-
 import Title from './Title';
+import { query, collection, orderBy, onSnapshot } from 'firebase/firestore';
+import { db } from './firebaseInitCode';
 
-// Generate Sales Data
-function createData(time, amount) {
-  return { time, amount: amount ?? null };
-}
-
-const data = [
-  createData('00:00', 0),
-  createData('03:00', 300),
-  createData('06:00', 600),
-  createData('09:00', 800),
-  createData('12:00', 1500),
-  createData('15:00', 2000),
-  createData('18:00', 2400),
-  createData('21:00', 2400),
-  createData('24:00'),
-];
-
-export default function Chart() {
+export default function Chart({ dataType }) {
+  const [data, setData] = useState([]);
   const theme = useTheme();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const q = query(collection(db, 'plantData'), orderBy('time', 'desc'));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const newData = [];
+        querySnapshot.forEach((doc) => {
+          newData.push(doc.data());
+        });
+        setData(newData);
+      });
+      return unsubscribe;
+    };
+
+    fetchData();
+  }, []);
+
+  const generateChartData = (type) => {
+    return data.map((item) => {
+      return { time: item.time, amount: item[type] };
+    });
+  };
+
+  const formatDataType = (dataType) => {
+    switch (dataType) {
+      case 'lightLevel':
+        return 'Light Level';
+      case 'humidity':
+        return 'Humidity';
+      case 'moisture':
+        return 'Moisture';
+      case 'temperature':
+        return 'Temperature';
+      default:
+        return dataType;
+    }
+  };
 
   return (
     <React.Fragment>
-      <Title>Today</Title>
-      <div style={{ width: '100%', flexGrow: 1, overflow: 'hidden' }}>
+      <Title>{formatDataType(dataType)}</Title>
+      <div style={{ height: '300px' }}>
         <LineChart
-          dataset={data}
-          margin={{
-            top: 16,
-            right: 20,
-            left: 70,
-            bottom: 30,
-          }}
+          dataset={generateChartData(dataType)}
           xAxis={[
             {
               scaleType: 'point',
               dataKey: 'time',
-              label: 'Overall plant health',
               tickNumber: 2,
               tickLabelStyle: theme.typography.body2,
             },
           ]}
           yAxis={[
             {
-              label: 'Sales ($)',
+              label: `${formatDataType(dataType)}`,
               labelStyle: {
                 ...theme.typography.body1,
                 fill: theme.palette.text.primary,
               },
               tickLabelStyle: theme.typography.body2,
-              max: 2500,
-              tickNumber: 3,
             },
           ]}
           series={[
@@ -64,13 +77,7 @@ export default function Chart() {
               color: theme.palette.primary.light,
             },
           ]}
-          sx={{
-            [`.${axisClasses.root} line`]: { stroke: theme.palette.text.secondary },
-            [`.${axisClasses.root} text`]: { fill: theme.palette.text.secondary },
-            [`& .${axisClasses.left} .${axisClasses.label}`]: {
-              transform: 'translateX(-25px)',
-            },
-          }}
+          grid={{ vertical: true, horizontal: true }}
         />
       </div>
     </React.Fragment>
