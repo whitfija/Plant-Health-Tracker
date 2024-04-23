@@ -3,11 +3,11 @@ import Link from '@mui/material/Link';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { db } from './firebaseInitCode';
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, where } from "firebase/firestore";
 
 export default function Welcome({ userId }) {
     const [userName, setUserName] = React.useState("");
-    const numberOfPlants = 1;
+    const [numberOfPlants, setNumberOfPlants] = React.useState(0);
 
     React.useEffect(() => {
         const fetchUserData = async () => {
@@ -17,6 +17,9 @@ export default function Welcome({ userId }) {
             if (userDocSnap.exists()) {
               const userData = userDocSnap.data();
               setUserName(userData.fname);
+              const plantsSnapshot = await getDocs(collection(db, 'plants'), where('userid', '==', userId));
+              console.log(plantsSnapshot.size)
+              setNumberOfPlants(plantsSnapshot.size)
             } else {
               console.log("No such document!");
             }
@@ -35,9 +38,9 @@ export default function Welcome({ userId }) {
             Hello {userName}!
         </Typography>
         <Typography variant="subtitle1" gutterBottom>
-            You are monitoring {numberOfPlants} plant(s)
+            Monitoring {numberOfPlants} plant(s)
         </Typography>
-        <Button variant="contained" color="primary" >
+        <Button variant="contained" color="primary" href='/plant/new'>
             Add New Plant
         </Button>
         <Button variant="contained" color="secondary" style={{  }}>

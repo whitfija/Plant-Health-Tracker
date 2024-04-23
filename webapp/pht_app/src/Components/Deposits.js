@@ -7,7 +7,7 @@ function preventDefault(event) {
   event.preventDefault();
 }
 
-export default function HealthStatus({dataSet, health, dataTime, onSelectChart, chartRef }) {
+export default function HealthStatus({dataSet, health, dataTime, onSelectChart, chartRef, data}) {
   const handleViewHistory = (event) => {
     event.preventDefault();
     onSelectChart(dataSet.toLowerCase());
@@ -23,8 +23,11 @@ export default function HealthStatus({dataSet, health, dataTime, onSelectChart, 
   return (
     <React.Fragment>
       <Title>{dataSet}</Title>
+      <Typography component="p" variant="h4">
+        {data}
+      </Typography>
       <Typography component="p" variant="h4" style={textStyle}>
-        Status: {health}
+        ({health})
       </Typography>
       <Typography color="text.secondary" sx={{ flex: 1 }}>
         {dataTime}

@@ -11,11 +11,12 @@ import HealthStatus from './Deposits';
 import RecentData from './RecentData';
 import Overlay from './Overlay';
 import { db } from './firebaseInitCode';
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
+import { getFirestore, collection, doc, addDoc, getDoc, getDocs, query, where, orderBy, onSnapshot} from "firebase/firestore";
 import { useState, useEffect } from 'react';
 import Loading from './Loading';
 import Welcome from './Welcome';
 import PlantHome from './PlantHome';
+import { useParams } from 'react-router-dom';
 
 const theme = createTheme({
   palette: {
@@ -28,7 +29,7 @@ const theme = createTheme({
   },
 });
 
-export default function Dashboard() {
+export default function Dashboard({plantId, userId}) {
   const [open, setOpen] = React.useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState([]);
@@ -37,9 +38,13 @@ export default function Dashboard() {
   const [moistureHealthy, setMoistureHealthy] = useState(false);
   const [humidityHealthy, setHumidityHealthy] = useState(false);
   const [temperatureHealthy, setTemperatureHealthy] = useState(false);
+  const [plantDoc, setPlantDoc] = useState(null);
+  const { id } = useParams();
+  //console.log(userId)
+
   useEffect(() => {
     const fetchData = async () => {
-      const q = query(collection(db, 'plantData'), orderBy('time', 'desc'));
+      const q = query(collection(db, 'plantData'), where('plantId', '==', plantId), orderBy('time', 'desc'));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const newData = [];
         querySnapshot.forEach((doc) => {
@@ -47,32 +52,62 @@ export default function Dashboard() {
         });
         setData(newData);
         setMostRecentDataPt(newData[0])
+        setIsLoading(false);
       });
       return unsubscribe;
     };
-
     fetchData();
-  }, [db]);
+  }, [id]);
+
+  useEffect(() => {
+    const fetchPlantData = async () => {
+      try {
+        //console.log(plantId)
+        const plantDocRef = doc(db, 'plants', plantId);
+        const plantDocSnap = await getDoc(plantDocRef);
+        if (plantDocSnap.exists()) {
+          const plantData = plantDocSnap.data();
+          setPlantDoc(plantData);
+        } else {
+          console.log('No such document in plants!');
+        }
+      } catch (error) {
+        console.error('Error fetching plant data: ', error);
+      }
+    };
+
+    fetchPlantData();
+  }, [plantId]);
 
   useEffect(() => {
     const fetchPlantMetaData = async () => {
-      // Will rewrite this query to be flexible for whatever plant the user is using
-      const q = query(collection(db, 'plantType'), where('__name__', '==', 'African Violet'))
-      const querySnapshot = await getDocs(q);
-      let baseline;
-      querySnapshot.forEach((doc) => {
-        baseline = doc.data();
-      });
-      (mostRecentDataPt['lightLevel'] <= baseline.Light[1] && mostRecentDataPt['lightLevel'] >= baseline.Light[0])?setLightHealthy(true):setLightHealthy(false);
-      (mostRecentDataPt['humidity'] <= baseline.Humidity[1] && mostRecentDataPt['humidity'] >= baseline.Humidity[0])?setHumidityHealthy(true):setHumidityHealthy(false);
-      (mostRecentDataPt['moisture'] <= baseline.Moisture[1] && mostRecentDataPt['moisture'] >= baseline.Moisture[0])?setMoistureHealthy(true):setMoistureHealthy(false);
-      (mostRecentDataPt['temperature'] <= baseline.Temperature[1] && mostRecentDataPt['temperature'] >= baseline.Temperature[0])?setTemperatureHealthy(true):setTemperatureHealthy(false);
-      setTimeout(() => {
-        setIsLoading(false);
-      }, 1000);
+      try {
+        if (plantDoc) {
+          //console.log(plantDoc)
+          //console.log(plantDoc['type'])
+          const plantType = plantDoc['type'].replace(/"/g, '');
+          const plantTypeDocRef = doc(db, 'plantType', plantType);
+          const plantTypeDocSnap = await getDoc(plantTypeDocRef);
+    
+          if (plantTypeDocSnap.exists()) {
+            const baseline = plantTypeDocSnap.data();
+    
+            (mostRecentDataPt['lightLevel'] <= baseline.Light[1] && mostRecentDataPt['lightLevel'] >= baseline.Light[0]) ? setLightHealthy(true) : setLightHealthy(false);
+            (mostRecentDataPt['humidity'] <= baseline.Humidity[1] && mostRecentDataPt['humidity'] >= baseline.Humidity[0]) ? setHumidityHealthy(true) : setHumidityHealthy(false);
+            (mostRecentDataPt['moisture'] <= baseline.Moisture[1] && mostRecentDataPt['moisture'] >= baseline.Moisture[0]) ? setMoistureHealthy(true) : setMoistureHealthy(false);
+            (mostRecentDataPt['temperature'] <= baseline.Temperature[1] && mostRecentDataPt['temperature'] >= baseline.Temperature[0]) ? setTemperatureHealthy(true) : setTemperatureHealthy(false);
+
+            setIsLoading(false);
+          } else {
+            console.log('No such document in plantType!');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching plant type data: ', error);
+      }
     };
     fetchPlantMetaData();
-  }, [mostRecentDataPt]);
+  }, [plantId]);
 
 
   // for selecting charts
@@ -108,15 +143,18 @@ export default function Dashboard() {
               {/* Welcome */}
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2, height: 261.49 }}>
-                  <Welcome userId="0"/>
+                  <Welcome userId={userId}/>
                 </Paper>
               </Grid>
               {/* Plant Home */}
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2}}>
-                  <PlantHome plantId="0JpvIKo0TQ8r70AeSKhe" />
+                  <PlantHome plantData={plantDoc} />
                 </Paper>
               </Grid>
+
+              {mostRecentDataPt && (
+              <>
 
               {/* health statuses */}
               <Grid item xs={12} md={4} lg={3}>
@@ -128,7 +166,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Light" health={lightHealthy ? "Good" : "Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('lightLevel')} chartRef={chartPaper}/>
+                  <HealthStatus dataSet="Light" health={lightHealthy ? "Good" : "Bad"} dataTime={mostRecentDataPt['time']} onSelectChart={() => handleChartSelection('lightLevel')} chartRef={chartPaper} data={mostRecentDataPt['lightLevel'] + '%'}/>
                 </Paper>
               </Grid>
               <Grid item xs={12} md={4} lg={3}>
@@ -140,7 +178,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Moisture" health={moistureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('moisture')} chartRef={chartPaper}/>
+                  <HealthStatus dataSet="Moisture" health={moistureHealthy?"Good":"Bad"} dataTime={mostRecentDataPt['time']} onSelectChart={() => handleChartSelection('moisture')} chartRef={chartPaper} data={mostRecentDataPt['moisture'] + '%'}/>
                 </Paper>
               </Grid>
                <Grid item xs={12} md={4} lg={3}>
@@ -152,7 +190,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Temperature" health={temperatureHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('temperature')} chartRef={chartPaper}/>
+                  <HealthStatus dataSet="Temperature" health={temperatureHealthy?"Good":"Bad"} dataTime={mostRecentDataPt['time']} onSelectChart={() => handleChartSelection('temperature')} chartRef={chartPaper} data={mostRecentDataPt['temperature'] + '°F'}/>
                 </Paper>
               </Grid>
               <Grid item xs={12} md={4} lg={3}>
@@ -164,7 +202,7 @@ export default function Dashboard() {
                     height: 240,
                   }}
                 >
-                  <HealthStatus dataSet="Humidity" health={humidityHealthy?"Good":"Bad"} dataTime={Date().toLocaleString()} onSelectChart={() => handleChartSelection('humidity')} chartRef={chartPaper}/>
+                  <HealthStatus dataSet="Humidity" health={humidityHealthy?"Good":"Bad"} dataTime={mostRecentDataPt['time']} onSelectChart={() => handleChartSelection('humidity')} chartRef={chartPaper} data={mostRecentDataPt['humidity'] + '%'}/>
                 </Paper>
               </Grid>
 
@@ -190,6 +228,7 @@ export default function Dashboard() {
                   <RecentData />
                 </Paper>
               </Grid>
+              </>)}
             </Grid>
           </Container>
         </Box>

@@ -30,7 +30,7 @@ export default function RecentData() {
   return (
     <React.Fragment>
       <Title>Recent Plant Data</Title>
-      <div style={{ overflowX: 'auto' }}>
+      <div style={{ height: "600px", overflowX: 'auto', overflowY: "scroll"}}>
       <Table size="small">
         <TableHead>
           <TableRow>
