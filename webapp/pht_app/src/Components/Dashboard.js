@@ -133,25 +133,29 @@ export default function Dashboard() {
 
   const getPlantData = async() => {
     try {
-      fetch(`/scrapePlantData/${ip}`).then(res => res.json()).then(data => {
-        //If we sucessfully webscrape with the inputted ip
-        if(data.Data.length) {
-          let plantData = data.Data
-          let newData = {}
-          for(let individualData of plantData) {
-            let split = individualData.split(": ")
-            //If valid data, i.e Moisture: 123
-            if(split.length == 2) {
-              newData[split[0]] = parseInt(split[1])
+      console.log(ip)
+      if(ip){
+        fetch(`/scrapePlantData/${ip}`).then(res => res.json()).then(data => {
+          //If we sucessfully webscrape with the inputted ip
+          if(data.Data.length) {
+            let plantData = data.Data
+            let newData = {}
+            for(let individualData of plantData) {
+              let split = individualData.split(": ")
+              //If valid data, i.e Moisture: 123
+              if(split.length == 2) {
+                newData[split[0]] = parseFloat(split[1])
+              }
             }
+            newData['time'] = new Date().toLocaleString()
+            newData['plantId'] = '0JpvIKo0TQ8r70AeSKhe'
+            console.log(newData);
+            //Adds the most recent data point to the database
+            addDoc(collection(db, 'plantData'), newData);
+            //console.log(data.Data)
           }
-          newData['time'] = new Date().toLocaleString()
-          console.log(newData);
-          //Adds the most recent data point to the database
-          addDoc(collection(db, 'plantData'), newData);
-          //console.log(data.Data)
-        }
-      })
+        })
+      }
     } catch(err) {console.log(err.message)};
   }
 
@@ -161,7 +165,7 @@ export default function Dashboard() {
 
     const interval=setInterval(()=>{
       getPlantData()
-    }, 300000) //Every 5 minutes right now
+    }, 30000) //Every 5 minutes right now
 
     return()=>clearInterval(interval)
     }, [ip])
